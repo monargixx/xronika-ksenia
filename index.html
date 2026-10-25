@@ -1,0 +1,492 @@
+<title>Шпаргалка Ксении</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@1,500&display=swap">
+<style>
+  /* Мобильная шпаргалка: шапка-марка как на визитке, вкладки снизу, карточки с ответами по тапу */
+  :root {
+    --bg: #ecebe7;
+    --surface: #f8f7f4;
+    --fg: #17191b;
+    --muted: #6f6d68;
+    --line: rgba(23,25,27,.12);
+    --accent: #9c8158;
+    --no: #a24a3c;
+    --yes: #3f6b55;
+    --head-bg: #17191b;
+    --head-fg: #f1ede6;
+    --sans: "Manrope", "Segoe UI", Arial, sans-serif;
+    --voice: "Cormorant Garamond", Georgia, serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121315; --surface: #1c1e21; --fg: #ece8e1; --muted: #9a978f;
+      --line: rgba(236,232,225,.12); --accent: #c4a87c; --no: #d98272; --yes: #86b89c;
+      --head-bg: #0b0c0d; --head-fg: #ece8e1; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121315; --surface: #1c1e21; --fg: #ece8e1; --muted: #9a978f;
+    --line: rgba(236,232,225,.12); --accent: #c4a87c; --no: #d98272; --yes: #86b89c;
+    --head-bg: #0b0c0d; --head-fg: #ece8e1; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 16px; line-height: 1.5; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--head-bg); }
+
+  .wrap { max-width: 560px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+  header { background: var(--head-bg); color: var(--head-fg); }
+  header .wrap { padding-block: 28px 22px; }
+  .mark { font-weight: 500; letter-spacing: .42em; font-size: 15px; }
+  .rule { position: relative; height: 1px; background: currentColor; opacity: .3; margin: 14px 0 16px; }
+  .dot { position: absolute; left: 62%; top: -3px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+  header h1 { font-size: 24px; line-height: 1.25; margin: 0; font-weight: 600; text-wrap: balance; }
+  header p { margin: 6px 0 0; font-size: 14px; opacity: .75; }
+
+  nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+  nav .wrap { display: flex; gap: 4px; overflow-x: auto; padding-block: 8px; scrollbar-width: none; }
+  nav button {
+    flex: 1 0 auto; font: 600 14px var(--sans); color: var(--muted); background: none;
+    border: 0; padding: 10px 12px; border-radius: 999px; cursor: pointer;
+  }
+  nav button[aria-selected="true"] { background: var(--fg); color: var(--bg); }
+  nav button:focus-visible, .q:focus-visible, .pair:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  main .wrap { padding-block: 20px 48px; display: flex; flex-direction: column; gap: 22px; }
+  section[hidden] { display: none !important; }
+  .stack { display: flex; flex-direction: column; gap: 22px; }
+
+  h2 { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+  .say { font-family: var(--voice); font-style: italic; font-size: 21px; line-height: 1.4; margin: 0; }
+  .say + .say { margin-top: 12px; }
+  .note { font-size: 14px; color: var(--muted); margin: 8px 0 0; }
+  ul.plain { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+
+  .yn { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .yn > div { background: var(--surface); border-radius: 14px; padding: 14px; min-width: 0; font-size: 14px; }
+  .yn b { display: block; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+  .yn .y b { color: var(--yes); } .yn .n b { color: var(--no); }
+  .yn ul { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 4px; }
+  @media (max-width: 380px) { .yn { grid-template-columns: 1fr; } }
+
+  /* Словарь */
+  .hint { font-size: 14px; color: var(--muted); margin: 0; }
+  .pairs { display: flex; flex-direction: column; gap: 8px; }
+  .pair {
+    display: grid; grid-template-columns: 1fr; gap: 4px; text-align: left; width: 100%;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
+    font: inherit; color: inherit; cursor: pointer;
+  }
+  .pair .bad { color: var(--no); text-decoration: line-through; text-decoration-thickness: 1px; font-weight: 500; }
+  .pair .good { font-weight: 600; }
+  .quiz .pair:not(.open) .good { filter: blur(6px); opacity: .5; }
+
+  .tools { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { font: 600 14px var(--sans); padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+  .btn[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+  /* Вопросы */
+  .qs { display: flex; flex-direction: column; gap: 10px; }
+  .q { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; cursor: pointer; text-align: left; width: 100%; font: inherit; color: inherit; }
+  .q .ask { font-weight: 600; display: flex; justify-content: space-between; gap: 12px; }
+  .q .ask span:last-child { color: var(--muted); flex: none; }
+  .q .ans { display: none; margin-top: 10px; }
+  .q.open .ans { display: block; }
+  .q .ans .say { font-size: 19px; }
+  .q .tip { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .q.learned { border-color: var(--yes); }
+  .q.learned .ask span:last-child { color: var(--yes); }
+
+  .practice { background: var(--head-bg); color: var(--head-fg); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  .practice .ask { font-size: 19px; font-weight: 600; margin: 0; }
+  .practice .say { color: var(--head-fg); }
+  .practice .btn { background: transparent; color: var(--head-fg); border-color: rgba(241,237,230,.3); }
+  .practice .count { font-size: 13px; opacity: .6; }
+
+  .event { border-top: 1px solid var(--line); padding-top: 12px; }
+  .event b { display: block; }
+  .event span { font-size: 14px; color: var(--muted); }
+  .events { display: flex; flex-direction: column; gap: 12px; }
+
+  @media (prefers-reduced-motion: no-preference) { .q, .pair { transition: border-color .2s; } .pair .good { transition: filter .2s, opacity .2s; } }
+</style>
+
+<header>
+  <div class="wrap">
+    <div class="mark">ХРОНИКА</div>
+    <div class="rule"><span class="dot"></span></div>
+    <h1>Шпаргалка к ужину 26 октября</h1>
+    <p>Ксения, это всё, что нужно повторить. Тапай по карточкам.</p>
+  </div>
+</header>
+
+<nav>
+  <div class="wrap" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="main" id="t-main">Главное</button>
+    <button role="tab" aria-selected="false" data-tab="talk" id="t-talk">Разговор</button>
+    <button role="tab" aria-selected="false" data-tab="words" id="t-words">Слова</button>
+    <button role="tab" aria-selected="false" data-tab="qa" id="t-qa">Вопросы</button>
+    <button role="tab" aria-selected="false" data-tab="promo" id="t-promo">Продвижение</button>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap">
+
+    <section id="main" class="stack">
+      <div>
+        <h2>Твоя роль</h2>
+        <ul class="plain">
+          <li>Знакомишься, интересно рассказываешь о закрытой нише, берёшь контакты. Визиток на ужине не раздаём, контактами обмениваемся в Telegram.</li>
+          <li>Ничего не продаёшь и денег не просишь.</li>
+          <li>Твой козырь — ты сама: 21 год и 4 года в нише, куда почти никто не попадает.</li>
+          <li>Цель вечера: 3–5 человек, которые сказали «давайте созвонимся».</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2>Почему партнёру это выгодно</h2>
+        <ul class="plain">
+          <li><b>Спрос не зависит от кризисов.</b> Люди не перестают прощаться с близкими ни в какой экономике.</li>
+          <li><b>Рынок большой.</b> Официально 128 млрд ₽ за 2025 год (Росстат), и это только видимая часть.</li>
+          <li><b>Ниша пустая по брендам.</b> Соцсетей, мероприятий и узнаваемых имён почти нет. Кто зайдёт первым, тот и займёт место.</li>
+          <li><b>Физический актив.</b> Зал прощания — это помещение и оборудование, они сохраняют стоимость.</li>
+          <li><b>Вход на старте.</b> Проект в разработке: ранний партнёр заходит на лучших условиях.</li>
+          <li><b>Команда уже внутри.</b> Связи, опыт, прямые договорённости с фабриками. Самому на это нужны годы.</li>
+          <li><b>Обеление рынка.</b> Законы ужесточаются против серых игроков, а это на руку тем, кто работает открыто.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2>Как представиться</h2>
+        <p class="say">«Ксения, команда “Хроники”. Мы работаем в ритуальной сфере, одной из самых закрытых ниш, и делаем её прозрачной и человеческой.»</p>
+        <p class="note">Если интересно, продолжай:</p>
+        <p class="say">«Я в этой сфере с 17 лет. Изнутри она совсем не такая, как люди представляют. Сейчас мы разрабатываем проект своего зала прощания, и к нам приходят люди, которые хотят зайти в нишу.»</p>
+      </div>
+
+      <div>
+        <h2>Новое 25.10: цифры по Петербургу</h2>
+        <ul class="plain">
+          <li><b>Петербург:</b> больше 9 млрд ₽ в год, рынок растёт на 10–12% в год.</li>
+          <li><b>Прощаний в городе</b> около 60 тысяч в год, две трети выбирают кремацию.</li>
+          <li>Говорить «120 миллиардов в Питере» нельзя: это вся Россия.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2>На любой вопрос про цифры</h2>
+        <p class="say">«Финмодель сейчас в работе, Даниил покажет всё на встрече. Давайте я возьму ваш контакт?»</p>
+      </div>
+
+      <div class="yn">
+        <div class="y">
+          <b>Можно</b>
+          <ul>
+            <li>Почему ниша закрытая и стабильная</li>
+            <li>Идея своего зала прощания (это проект)</li>
+            <li>Свой опыт с 17 лет</li>
+            <li>Прямую работу с фабриками</li>
+            <li>Объём рынка: 128 млрд ₽ за 2025 год (Росстат)</li>
+            <li>Брать контакты (через Telegram)</li>
+          </ul>
+        </div>
+        <div class="n">
+          <b>Нельзя</b>
+          <ul>
+            <li>Говорить, что зал уже есть или строится</li>
+            <li>Цифры, суммы, сроки, проценты</li>
+            <li>Обещать доход</li>
+            <li>Подробности работы с телами</li>
+            <li>Прайс и скидки</li>
+            <li>Ругать конкурентов и называть фамилии</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <h2>Тон</h2>
+        <ul class="plain">
+          <li>Спокойно, тепло, с лёгкой улыбкой. Не мрачно и без чёрного юмора.</li>
+          <li>Рядом может оказаться человек, у которого недавно была утрата.</li>
+          <li>Про работу с телами спросили из любопытства? Переводи на людей: «самое сложное там не физическое, а то, как поддержать семью».</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2>Слова ниши, которые звучат профессионально</h2>
+        <ul class="plain">
+          <li><b>Deathcare</b> — так во всём мире называют ритуальную сферу как индустрию.</li>
+          <li><b>Похоронный дом (funeral home)</b> — западный формат: зал прощания, хранение и сопровождение семьи в одном месте. Наш проект ближе всего к нему.</li>
+          <li><b>Зал прощания</b> — место, где семья спокойно прощается с близким.</li>
+          <li><b>Полный цикл</b> — всё от первого звонка до церемонии, семье не нужно бегать по разным конторам.</li>
+          <li><b>Сопровождение семьи</b> — то, что мы на самом деле продаём: заботу и спокойствие в тяжёлый день.</li>
+          <li><b>Прозрачная смета</b> — семья заранее видит, за что платит, без «сюрпризов».</li>
+          <li><b>Предпохоронная подготовка</b> — профессиональный термин, если без него не обойтись. Подробностей не даём.</li>
+          <li><b>Колумбарий, мемориал</b> — места памяти, нейтральные слова.</li>
+          <li><b>Death Cafe</b> — мировое движение встреч, где спокойно говорят о жизни и смерти.</li>
+          <li><b>Обеление рынка</b> — переход ниши из тени в открытую работу.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2>После каждого разговора</h2>
+        <ul class="plain">
+          <li>Сразу в заметки: имя, чем занимается, о чём говорили, контакт.</li>
+          <li>27.10 скинуть список Даниилу и Полине.</li>
+          <li>Визиток нет (так решила Виктория). Держи наготове QR своего Telegram: Настройки → QR-код.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="talk" class="stack" hidden>
+      <div>
+        <h2>Главное правило</h2>
+        <p class="say">Сначала интересуйся другими. О себе рассказывай, когда спросят.</p>
+        <p class="note">Услышав «ритуальная сфера», человек почти наверняка сам начнёт спрашивать. Дождись этого момента.</p>
+      </div>
+
+      <div>
+        <h2>Как идёт разговор</h2>
+        <ul class="plain">
+          <li><b>Знакомство:</b> имя и одна фраза о себе. Сразу: «А вы чем занимаетесь?»</li>
+          <li><b>Интерес к его делу:</b> 2–3 вопроса, слушай и запоминай детали. Это большая часть разговора.</li>
+          <li><b>Он спрашивает о тебе:</b> короткая версия, пауза, смотришь на реакцию.</li>
+          <li><b>Если интересно:</b> ответы из вкладки «Вопросы».</li>
+          <li><b>Мостик:</b> «Давайте обменяемся контактами, Даниил покажет проект подробнее на встрече».</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2>Вопросы собеседнику</h2>
+        <ul class="plain">
+          <li>«Чем вы занимаетесь? Как пришли в это?»</li>
+          <li>«Что сейчас самое интересное в вашем проекте?»</li>
+          <li>«Какие ниши вам сейчас интересны?»</li>
+          <li>«Что для вас важно, чтобы зайти в проект?» — запомни ответ дословно, это золото для Даниила.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2>Кто будет за столом (по ролям)</h2>
+        <ul class="plain">
+          <li><b>Застройщик.</b> Самый важный разговор: для зала нужно особое помещение. Участие может быть помещением, а не деньгами.</li>
+          <li><b>Владелица завода остекления коммерческих объектов.</b> Знает коммерческую недвижимость и стройку.</li>
+          <li><b>Бизнесмен и блогер про Камбоджу.</b> Интересны новые ниши и медиа.</li>
+          <li><b>Основательница PR-агентства</b> (организатор). Вечера памяти — её тема.</li>
+          <li><b>Блогеры и известные гости.</b> Просто приятное знакомство, без проекта и инвестиций.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2>Как рассказать о проекте (новое 25.10)</h2>
+        <p class="say">«Мы идём по шагам. Сначала бренд и своя офлайн-точка, куда семья может прийти и спокойно поговорить. Потом свой зал прощания. Своё бережное хранение — последним. На каждом шаге есть точка проверки, поэтому партнёр рискует меньше.»</p>
+        <p class="note">Финмодель уже посчитана в трёх сценариях, но цифры показывает только Даниил на встрече. Ты говоришь: «Расчёты готовы, Даниил покажет их на встрече».</p>
+      </div>
+
+      <div>
+        <h2>Если Даниила нет за столом</h2>
+        <p class="say">«Даниил — основатель и руководитель “Хроники”, практик с базой. Финансы и партнёрство — его зона. Я лучше всех расскажу, как всё устроено изнутри.»</p>
+      </div>
+    </section>
+
+    <section id="words" class="stack" hidden>
+      <div class="tools">
+        <button class="btn" id="quizBtn" aria-pressed="false">Проверить себя</button>
+      </div>
+      <p class="hint" id="wordsHint">Слева то, что не говорим, ниже — чем заменить.</p>
+      <div class="pairs" id="pairs"></div>
+    </section>
+
+    <section id="qa" class="stack" hidden>
+      <div class="practice">
+        <div class="count" id="pCount"></div>
+        <p class="ask" id="pAsk"></p>
+        <p class="say" id="pAns" hidden></p>
+        <div class="tools">
+          <button class="btn" id="pShow">Показать ответ</button>
+          <button class="btn" id="pNext">Следующий вопрос</button>
+        </div>
+      </div>
+      <p class="hint">Тренировка: вопрос попадается случайно. Сначала ответь вслух сама, потом сверься. Ниже все вопросы: тап открывает ответ, второй тап отмечает его выученным.</p>
+      <div class="qs" id="qs"></div>
+    </section>
+
+    <section id="promo" class="stack" hidden>
+      <div>
+        <h2>«Как вы продвигаетесь?»</h2>
+        <p class="say">«Сейчас у нас сайт и реклама в Яндексе. Она работает, но в нашей нише это гонка бюджетов. Мы идём через бренд: хотим, чтобы о нас знали заранее, как о людях, которым доверяют, а не находили в поиске в худший день.»</p>
+        <p class="say">«Поэтому соцсети с живыми лицами команды и свои вечера с партнёрами: поэзия, кино, разговоры о памяти. В России так почти никто не делает, а в мире это уже большое движение.»</p>
+      </div>
+      <div>
+        <h2>«Какое движение?»</h2>
+        <p class="say">«Death Cafe. С 2011 года по всему миру проходят встречи, где за чаем спокойно говорят о жизни и смерти.»</p>
+      </div>
+      <div>
+        <h2>Идеи вечеров, если спросят подробнее</h2>
+        <div class="events">
+          <div class="event"><b>«Кафе о главном»</b><span>15–25 человек, чай или вино, ведущий-психолог, разговор о жизни и памяти</span></div>
+          <div class="event"><b>Поэтический вечер о прощании и памяти</b><span>Серебряный век, скрипка, свечи, партнёры: книжный, свечи, вино</span></div>
+          <div class="event"><b>Прогулка по Литераторским мосткам</b><span>Волковское кладбище с историком: Тургенев, Блок, Менделеев</span></div>
+          <div class="event"><b>Кинопоказ «Ушедшие»</b><span>Япония, 2008, «Оскар»: фильм о человеке, который готовит усопших к прощанию</span></div>
+          <div class="event"><b>Благотворительный вечер памяти</b><span>сбор для хосписа, живая музыка, аукцион работ художников</span></div>
+          <div class="event"><b>Лекторий «Петербург и память»</b><span>историк о старых традициях, траурной моде XIX века, некрополях</span></div>
+          <div class="event"><b>Концерт «Музыка прощания»</b><span>«Реквием» Моцарта, Шопен, современные композиторы, рассказ о каждом произведении</span></div>
+          <div class="event"><b>Выставка «Как прощаются в мире»</b><span>Мексика, Гана, Япония, Бали: фото и лекция антрополога</span></div>
+          <div class="event"><b>Закрытый ужин «Закрытая ниша»</b><span>10–12 предпринимателей: как устроена сфера изнутри</span></div>
+        </div>
+        <p class="note">Вечера проходят у партнёров: в кафе, книжных, галереях. Рядом с местом хранения их не проводим.</p>
+      </div>
+      <div>
+        <h2>Цифры по охватам</h2>
+        <p class="hint">Не называем, их пока нет. Говорим только о направлении.</p>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+  const WORDS = [
+    ["морг", "место хранения · в нашем проекте: своё бережное хранение"],
+    ["трупохранилище", "свой зал прощания с бережным хранением (в проекте)"],
+    ["труп, тело", "близкий человек · усопший"],
+    ["ритуалка, похоронка", "ритуальная сфера · deathcare"],
+    ["похороны", "прощание · церемония прощания"],
+    ["закопать, хоронить", "погребение (лучше не уходить в процесс)"],
+    ["умер, помер, смерть", "ушёл · утрата · семья потеряла близкого"],
+    ["клиенты, заказ", "семьи · обращения"],
+    ["гроб, венки, товар", "всё необходимое для церемонии"],
+    ["на смерти хорошо зарабатывают", "устойчивый спрос, который не зависит от кризисов"],
+    ["чёрные агенты, откаты", "в нише много непрозрачного, мы строим всё открыто"],
+    ["мы ищем инвесторов", "знакомимся с теми, кому интересна ниша"],
+    ["окупится за год, х2", "посчитаем на встрече, финмодель у Даниила"],
+    ["покойник", "усопший · близкий человек"],
+    ["могила", "место памяти · место захоронения"],
+    ["вскрытие, бальзамирование", "подготовка к прощанию (без подробностей)"],
+    ["катафалк", "специальный транспорт"],
+    ["дешёвые похороны, эконом", "базовый вариант церемонии"],
+    ["VIP-похороны, дорогие", "индивидуальная церемония"],
+    ["бизнес на горе", "сфера заботы о семье"],
+    ["перехватить клиента первыми", "первыми прийти на помощь семье"],
+    ["трупы за стенкой", "бережное хранение отдельно от зала"],
+    ["ритуальный агент", "координатор · специалист по сопровождению семьи"],
+    ["рынок держат бандиты", "в нише много непрозрачного"]
+  ];
+
+  const QA = [
+    ["Чем вы занимаетесь?", "«Мы в ритуальной сфере. Знаю, звучит неожиданно для такого ужина. Но это одна из самых закрытых и стабильных ниш, и мы хотим показать её с другой стороны.»", "С улыбкой."],
+    ["Это же мрачно. Как вы с этим работаете в 21?", "«Мрачной её делают стереотипы. На деле это про то, чтобы помочь семье в самый тяжёлый день. Когда делаешь это хорошо, люди потом благодарят годами. Я с 17 лет здесь и ни разу не пожалела.»"],
+    ["Почему ниша закрытая?", "«Всё держится на связях и репутации: больницы, места хранения, кладбища, крематории. Новичку нужны годы, чтобы его начали пускать. Наш руководитель Даниил — практик, у нас этот путь уже пройден.»"],
+    ["Почему именно сейчас?", "«Ниша огромная: официально больше 128 миллиардов в год, это данные Росстата за 2025-й. А брендов, соцсетей и мероприятий в ней почти нет. На Западе это давно публичная индустрия, с блогами и компаниями на бирже. У нас место пустое, пока его никто не занял.»"],
+    ["Кто на этом рынке главный?", "«Исторически город держат несколько крупных групп, о них много писали журналисты. Они работают тихо, без публичности. Мы молодое поколение и идём открыто.»", "Фамилий не называй, даже если собеседник называет сам."],
+    ["Чем вы отличаетесь от больших игроков?", "«Мы работаем открыто и деликатно. И у нас прямые договорённости с фабриками на хороших условиях. Большие игроки держатся на связях, а мы строим на доверии.»"],
+    ["Почему мне это выгодно?", "«Три вещи. Спрос, который не зависит от кризисов. Физический объект, который сохраняет стоимость. И вход в нишу на старте, пока она пустая. Плюс команда, которая уже внутри и знает, как всё устроено.»"],
+    ["Почему мне не зайти в нишу самому?", "«Можно, но без связей это годы: места хранения, больницы, кладбища, поставщики. У нас это уже есть, и фабрики работают с нами напрямую на хороших условиях.»"],
+    ["Какие риски?", "«Главные — регулирование и крупные игроки. Поэтому мы делаем всё прозрачно и по требованиям, а аудиторию строим через доверие, а не через связи. Подробный разбор рисков Даниил покажет на встрече.»", "Честно признать риски — это плюс, инвесторы такому верят больше."],
+    ["Как устроено партнёрство: доля, заём?", "«Форматов несколько, Даниил покажет их вместе с расчётами. Финансовая часть — его зона, а я лучше всех расскажу, как всё работает изнутри.»"],
+    ["Когда окупится?", "«Это покажет финмодель, не хочу гадать на бегу. Давайте Даниил пришлёт вам расчёты?»"],
+    ["Сколько у вас сейчас заказов, какой оборот?", "«Цифры Даниил покажет на встрече, с документами. За ужином не хочу называть их приблизительно.»"],
+    ["Вам 21, у вас вообще есть опыт?", "«Четыре года, каждый день внутри сферы. В нише, куда новичков не пускают, это много. А руководитель у нас практик с базой.»"],
+    ["Почему вам можно доверять?", "«Мы давно в сфере, нас рекомендуют семьи, и мы ничего не прячем. На встрече всё покажем с документами.»"],
+    ["А если законы ужесточат?", "«Ужесточение бьёт по серым игрокам. Тем, кто работает открыто, оно на руку: журналисты пишут, что рынок будет расти как раз за счёт обеления.»"],
+    ["Что я получу, кроме денег?", "«Участие в проекте, который меняет целую сферу. И сообщество вокруг него: вечера, партнёры, медиа. Это редкая история, о которой интересно рассказывать.»"],
+    ["Можно масштабировать?", "«Начинаем с Петербурга. Если модель зала сработает, её можно повторять в других местах.»"],
+    ["А в чём идея для инвестора?", "«Главный страх семьи — непонятно, где и как хранится близкий человек. Мы разрабатываем свой зал прощания с собственным бережным хранением, чтобы семья точно знала, что о близком заботятся. Для партнёра это физический объект: помещение и оборудование плюс стабильный спрос. Проект на старте, и сейчас самое интересное время зайти.»"],
+    ["Чем ваш зал будет лучше обычного морга?", "«Это не про медицину, а про отношение. Своё бережное хранение и зал прощания в одном месте: семья сможет приехать, всё будет видно и понятно, никаких сюрпризов.»"],
+    ["Сколько можно заработать? Какая доходность?", "«Цифры не хочу называть на бегу. Финмодель сейчас в работе, Даниил покажет всё на встрече. Давайте я возьму ваш контакт?»"],
+    ["Сколько нужно вложить?", "«Зависит от формата участия, их несколько. Это лучше обсудить с Даниилом лично, с расчётами на руках.»"],
+    ["Помещение уже есть? Когда открываетесь?", "«Пока нет, проект на стадии разработки: концепция, формат, расчёты. Поэтому и знакомимся с партнёрами сейчас. Ранним партнёрам всегда интереснее.»", "Честно: помещения нет. Сроков не называй."],
+    ["А лицензии, законность?", "«Конечно, всё по требованиям. Юридическую часть подробно расскажет Даниил, это его зона.»", "Не углубляйся."],
+    ["Почему не взять кредит в банке?", "«Нам важно не только финансирование, но и люди рядом: кто разбирается в недвижимости, в бизнесе, в продвижении. Поэтому мы здесь, а не в банке.»"],
+    ["Как вы продвигаетесь?", "«Реклама в Яндексе у нас есть, но в нише это гонка бюджетов. Мы идём через бренд: соцсети с живыми лицами и свои вечера с партнёрами, поэтические, кино, разговоры о памяти. Хотим, чтобы нас знали заранее как людей, которым доверяют.»"],
+    ["Это же нелегально, там все серые", "«Серого в нише хватает, это правда. Поэтому мы всё делаем открыто, и свой зал прощания задумали ровно для этого. Прозрачность здесь и есть конкурентное преимущество.»"],
+    ["Собеседник рассказывает о своей утрате", "«Мне очень жаль.»", "Слушай. Про услуги и инвестиции в этом разговоре не говори вообще."],
+    ["У меня родственник болеет, можно к вам обратиться?", "«Конечно. Давайте обменяемся контактами, Даниил с вами свяжется.»", "Тихо и тепло, без деталей и цен за столом."],
+    ["Финмодель уже есть?", "«Да, расчёты готовы в трёх сценариях, включая осторожный. Даниил покажет их на встрече, за столом не хочу пересказывать урывками.»", "Новое 25.10."],
+    ["Почему зал, а не просто агентство?", "«Агентство борется рекламой за первый звонок. А зал — место, которое семья может увидеть заранее, где всё прозрачно. Это доверие, и зал можно сдавать другим.»"],
+    ["Почему не сразу большой центр?", "«Идём по шагам: сначала своя офлайн-точка, потом зал прощания, своё хранение в самом конце. На каждом шаге точка проверки, так партнёр рискует меньше.»"],
+    ["Сколько вообще прощаний в городе?", "«Около 60 тысяч в год, две трети — кремация. Проекту хватит меньше процента города.»"],
+    ["У меня есть недвижимость / я застройщик", "«Вот это очень интересно! Для зала прощания нужно особое помещение: отдельно стоящее, не рядом с жильём, со своим подъездом. Даниил будет рад обсудить: участвовать можно и помещением, а не деньгами. Давайте я возьму ваш контакт?»", "Сразу бери контакт и запиши, какие объекты у человека."],
+    ["Можно войти не деньгами?", "«Да: помещение, ремонт, медиа, вечера. Подробно расскажет Даниил.»"],
+    ["Насколько большой рынок в Петербурге?", "«Только Петербург — больше 9 миллиардов в год и растёт на 10–12% в год.»"]
+  ];
+
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+
+  // Вкладки
+  const tabs = document.querySelectorAll('nav button');
+  function openTab(id) {
+    tabs.forEach(b => b.setAttribute('aria-selected', b.dataset.tab === id));
+    document.querySelectorAll('main section').forEach(s => s.hidden = s.id !== id);
+    store.set('tab', id);
+  }
+  tabs.forEach(b => b.addEventListener('click', () => { openTab(b.dataset.tab); window.scrollTo(0, 0); }));
+  const startTab = ['main', 'talk', 'words', 'qa', 'promo'].includes(location.hash.slice(1)) ? location.hash.slice(1) : store.get('tab', 'main');
+  openTab(startTab);
+
+  // Словарь
+  const pairsEl = document.getElementById('pairs');
+  WORDS.forEach(([bad, good]) => {
+    const b = document.createElement('button');
+    b.className = 'pair';
+    b.innerHTML = `<span class="bad"></span><span class="good"></span>`;
+    b.querySelector('.bad').textContent = bad;
+    b.querySelector('.good').textContent = good;
+    b.addEventListener('click', () => b.classList.toggle('open'));
+    pairsEl.appendChild(b);
+  });
+  const quizBtn = document.getElementById('quizBtn');
+  quizBtn.addEventListener('click', () => {
+    const on = quizBtn.getAttribute('aria-pressed') !== 'true';
+    quizBtn.setAttribute('aria-pressed', on);
+    pairsEl.classList.toggle('quiz', on);
+    pairsEl.querySelectorAll('.pair').forEach(p => p.classList.remove('open'));
+    document.getElementById('wordsHint').textContent = on
+      ? 'Замена скрыта. Скажи вслух, как заменить, потом тапни и сверься.'
+      : 'Слева то, что не говорим, ниже — чем заменить.';
+    quizBtn.textContent = on ? 'Показать всё' : 'Проверить себя';
+  });
+
+  // Вопросы
+  let learned = store.get('learned', []);
+  const qsEl = document.getElementById('qs');
+  QA.forEach(([ask, ans, tip], i) => {
+    const b = document.createElement('button');
+    b.className = 'q' + (learned.includes(i) ? ' learned' : '');
+    b.innerHTML = `<div class="ask"><span></span><span></span></div><div class="ans"><p class="say"></p>${tip ? '<div class="tip"></div>' : ''}</div>`;
+    b.querySelector('.ask span').textContent = ask;
+    b.querySelector('.say').textContent = ans;
+    if (tip) b.querySelector('.tip').textContent = tip;
+    const mark = b.querySelector('.ask span:last-child');
+    const paint = () => mark.textContent = learned.includes(i) ? 'выучено' : (b.classList.contains('open') ? 'тап: выучено' : '+');
+    paint();
+    b.addEventListener('click', () => {
+      if (!b.classList.contains('open')) { b.classList.add('open'); }
+      else if (!learned.includes(i)) { learned.push(i); b.classList.add('learned'); }
+      else { learned = learned.filter(x => x !== i); b.classList.remove('learned', 'open'); }
+      store.set('learned', learned);
+      paint(); updateCount();
+    });
+    qsEl.appendChild(b);
+  });
+
+  // Тренировка
+  const pAsk = document.getElementById('pAsk'), pAns = document.getElementById('pAns'), pShow = document.getElementById('pShow');
+  let cur = -1;
+  function updateCount() { document.getElementById('pCount').textContent = `Выучено ${learned.length} из ${QA.length}`; }
+  function next() {
+    const pool = QA.map((_, i) => i).filter(i => i !== cur && !learned.includes(i));
+    const from = pool.length ? pool : QA.map((_, i) => i).filter(i => i !== cur);
+    cur = from[Math.floor(Math.random() * from.length)];
+    pAsk.textContent = QA[cur][0];
+    pAns.textContent = QA[cur][1];
+    pAns.hidden = true;
+    pShow.hidden = false;
+  }
+  pShow.addEventListener('click', () => { pAns.hidden = false; pShow.hidden = true; });
+  document.getElementById('pNext').addEventListener('click', next);
+  updateCount(); next();
+</script>
